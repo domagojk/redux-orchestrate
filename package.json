@@ -17,6 +17,10 @@
     "debounce",
     "saga"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domagojk/redux-orchestrate.git"
+  },
   "author": "Domagoj Kriskovic",
   "license": "MIT",
   "devDependencies": {
