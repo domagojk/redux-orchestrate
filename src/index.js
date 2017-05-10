@@ -61,6 +61,38 @@ const orchestrate = (config, options) => store => next => originalAction => {
           dispatchAction = {...action, type: ruleConfig.dispatch}
         }
     
+        let requestConfig = ruleConfig.request
+        if (ruleConfig.get) {
+          requestConfig = {...ruleConfig.get, method: 'GET'}
+        }
+        if (ruleConfig.post) {
+          requestConfig = {...ruleConfig.post, method: 'POST'}
+        }
+        if (ruleConfig.put) {
+          requestConfig = {...ruleConfig.put, method: 'PUT'}
+        }
+        if (ruleConfig.patch) {
+          requestConfig = {...ruleConfig.patch, method: 'PATCH'}
+        }
+        if (ruleConfig.del) {
+          requestConfig = {...ruleConfig.del, method: 'DELETE'}
+        }
+        if (ruleConfig.head) {
+          requestConfig = {...ruleConfig.head, method: 'HEAD'}
+        }
+        if (ruleConfig.options) {
+          requestConfig = {...ruleConfig.options, method: 'OPTIONS'}
+        }
+        
+        if (
+          rule._req &&
+          requestConfig && 
+          requestConfig.cancelWhen && 
+          requestConfig.cancelWhen.indexOf(action.type) !== -1
+        ) {
+          rule._req.abort()
+        }
+
         if (action.type === c) {
           matched = true
           delayDubounce(action, ruleConfig, () => {
@@ -68,31 +100,8 @@ const orchestrate = (config, options) => store => next => originalAction => {
               internalNext(dispatchAction)
             }
 
-            let requestConfig = ruleConfig.request
-            if (ruleConfig.get) {
-              requestConfig = {...ruleConfig.get, method: 'GET'}
-            }
-            if (ruleConfig.post) {
-              requestConfig = {...ruleConfig.post, method: 'POST'}
-            }
-            if (ruleConfig.put) {
-              requestConfig = {...ruleConfig.put, method: 'PUT'}
-            }
-            if (ruleConfig.patch) {
-              requestConfig = {...ruleConfig.patch, method: 'PATCH'}
-            }
-            if (ruleConfig.del) {
-              requestConfig = {...ruleConfig.del, method: 'DELETE'}
-            }
-            if (ruleConfig.head) {
-              requestConfig = {...ruleConfig.head, method: 'HEAD'}
-            }
-            if (ruleConfig.options) {
-              requestConfig = {...ruleConfig.options, method: 'OPTIONS'}
-            }
-
             if (requestConfig) {
-              request({
+              rule._req = request({
                 json: true,
                 ...requestConfig,
                 callback: function (err, res) {

@@ -1,22 +1,5 @@
-import orchestrate from './index'
+import orchestrate from '../src/index'
 import { createStore, applyMiddleware } from 'redux'
-
-/*
-[
-	{
-		case: SEARCH_INPUT_CHARACTER_ENTERED,
-		debounce: 500,
-		get: (a, s) => ({
-			url: autocomplete/a.payload,
-			cancelWhen: [
-				SEARCH_INPUT_CHARACTER_ENTERED,
-				SEARCH_INPUT_BLURED
-			],
-			onSuccess: AUTOCOMPLETE_SUGGESTION
-		})
-	}
-]
-*/
 
 function getActions(config, options, dispatcher) {
   const actions = []
@@ -440,4 +423,45 @@ it('should fail sending request - debounce', (done) => {
   store.dispatch({ type: 'CHAT_INPUT_SUBMITTED' })
   store.dispatch({ type: 'MESSANGER_INPUT_SUBMITED' })
   store.dispatch({ type: 'CHAT_INPUT_SUBMITTED' })
+})
+
+it('should cancel sending request', (done) => {
+  const actions = []
+  const options = { validate: true }
+  const config = [
+    {
+      case: 'ADD_MESSAGE_REQUESTED',
+      request: {
+        url: 'https://api.github.com/users/test',
+        headers: {
+          'User-Agent': 'jest-test-request'
+        },
+        onFail: 'ON_FAIL',
+        onSuccess: 'ON_SUCCESS',
+        cancelWhen: [
+          'CANCEL_EVENT',
+          'CANCEL_EVENT_SECOND'
+        ]
+      }
+    }
+  ]
+
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
+  store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
+
+  setTimeout(() => {
+    store.dispatch({ type: 'CANCEL_EVENT' })
+  }, 50)
+
+  setTimeout(() => {
+    if (actions.length === 1) {
+      done()
+    } else {
+      done.fail()
+    }
+  }, 100)
 })
