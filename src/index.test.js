@@ -3,14 +3,16 @@ import { createStore, applyMiddleware } from 'redux'
 
 /*
 [
-	{
-		case: ADD_MESSAGE_REQUESTED,
+  {
+		case: [
+			CHAT_INPUT_SUBMITTED,
+			MESSANGER_INPUT_SUBMITED
+		],
+		debounce: 1000,
 		post: {
-			url: something,
-			onSuccess: ADD_MESSAGE_SUCCEEDED,
-			onFail: ADD_MESSAGE_FAILED
+			url: 'analyticsDb/action.type'
 		}
-	},
+	}
 	{
 		case: SEARCH_INPUT_CHARACTER_ENTERED,
 		debounce: 500,
@@ -23,16 +25,6 @@ import { createStore, applyMiddleware } from 'redux'
 			onSuccess: AUTOCOMPLETE_SUGGESTION
 		})
 	},
-	{
-		case: [
-			CHAT_INPUT_SUBMITTED,
-			MESSANGER_INPUT_SUBMITED
-		],
-		debounce: 1000,
-		post: {
-			url: 'analyticsDb/action.type'
-		}
-	}
 	{
 		case: [
 			CHAT_INPUT_SUBMITTED,
@@ -304,4 +296,65 @@ it('should transform actions - delay debounce', (done) => {
       done.fail(`expected ${expectedNum} dispatched actions, got ${actions.length}`)
     }
   }, 110)
+})
+
+it('should fail sending request', (done) => {
+  const actions = []
+  const options = { validate: true }
+  const config = [
+    {
+      case: 'ADD_MESSAGE_REQUESTED',
+      request: {
+        url: 'https://non.existing.c',
+        headers: {
+          'User-Agent': 'request'
+        },
+        onSuccess: 'ADD_MESSAGE_SUCCEEDED',
+        onFail: 'ADD_MESSAGE_FAILED',
+        callback: () => {
+          if (actions[1].type === 'ADD_MESSAGE_FAILED') {
+            done()
+          }
+        }
+      }
+    }
+  ]
+
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestration(config, options)))
+  store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
+})
+
+it('should send request', (done) => {
+  // this test is depending on github api
+  const actions = []
+  const options = { validate: true }
+  const config = [
+    {
+      case: 'ADD_MESSAGE_REQUESTED',
+      request: {
+        url: 'https://api.github.com/users/test',
+        headers: {
+          'User-Agent': 'request'
+        },
+        onSuccess: res => ({ type: 'ADD_MESSAGE_SUCCEEDED', payload: res.body }),
+        onFail: 'ADD_MESSAGE_FAILED',
+        callback: () => {
+          if (actions[1].type === 'ADD_MESSAGE_SUCCEEDED' && actions[1].payload.login === 'test') {
+            done()
+          }
+        }
+      }
+    }
+  ]
+
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestration(config, options)))
+  store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
 })
