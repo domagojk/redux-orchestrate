@@ -1,18 +1,8 @@
-import orchestration from './index'
+import orchestrate from './index'
 import { createStore, applyMiddleware } from 'redux'
 
 /*
 [
-  {
-		case: [
-			CHAT_INPUT_SUBMITTED,
-			MESSANGER_INPUT_SUBMITED
-		],
-		debounce: 1000,
-		post: {
-			url: 'analyticsDb/action.type'
-		}
-	}
 	{
 		case: SEARCH_INPUT_CHARACTER_ENTERED,
 		debounce: 500,
@@ -24,49 +14,6 @@ import { createStore, applyMiddleware } from 'redux'
 			],
 			onSuccess: AUTOCOMPLETE_SUGGESTION
 		})
-	},
-	{
-		case: [
-			CHAT_INPUT_SUBMITTED,
-			MESSANGER_INPUT_SUBMITED
-		],
-		dispatch: { type: ADD_MESSAGE_REQUESTED, message: a.payload }
-	},
-	{
-		case: MESSAGE_NOTIFICATION_RECIEVED,
-		dispatch: { type: ADD_MESSAGE_SUCCEEDED, message: a.payload }
-	},
-	{
-		case: ADD_MESSAGE_REQUESTED,
-		request: {
-			url: url,
-			onSuccess: res => ({ type: ADD_MESSAGE_SUCCEEDED }),
-			onFail: res => ({ type: ADD_MESSAGE_FAILED })
-		}
-	},
-	{
-		case: SEARCH_INPUT_CHARACTER_ENTERED,
-		debounce: 500,
-		post: {
-			url: autocomplete/a.payload,
-			cancelWhen: [
-				SEARCH_INPUT_CHARACTER_ENTERED,
-				SEARCH_INPUT_BLURED
-			],
-			onSuccess: res => ({ type: AUTOCOMPLETE_SUGGESTION })
-		}
-	},
-	{
-		case: [
-			CHAT_INPUT_SUBMITTED,
-			MESSANGER_INPUT_SUBMITED
-		],
-		debounce: 1000,
-		request: {
-			url: 'analyticsDb/a.type',
-			onSuccess: null
-			onFail:  null
-		}
 	}
 ]
 */
@@ -77,7 +24,7 @@ function getActions(config, options, dispatcher) {
     actions.push(action)
     return state
   }
-  const store = createStore(reducer, applyMiddleware(orchestration(config, options)))
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   
   dispatcher(store.dispatch)
 
@@ -138,6 +85,23 @@ it('should transform actions - case array format', () => {
 
   expect(getLastAction(config, options, { type: 'TEST2' }))
     .toEqual({ type: 'AFTER_ORCHESTRATION' })
+})
+
+it('should transform actions - cascade', () => {
+  const options = { validate: true }
+  const config = [
+    {
+      case: 'TEST',
+      dispatch: 'AFTER_ORCHESTRATION'
+    },
+    {
+      case: 'AFTER_ORCHESTRATION',
+      dispatch: 'AFTER_AFTER_ORCHESTRATION'
+    }
+  ]
+
+  expect(getLastAction(config, options, { type: 'TEST' }))
+    .toEqual({ type: 'AFTER_AFTER_ORCHESTRATION' })
 })
 
 it('should transform actions - dispatch object', () => {
@@ -205,7 +169,7 @@ it('should transform actions - delay', (done) => {
     actions.push(action)
     return state
   }
-  const store = createStore(reducer, applyMiddleware(orchestration(config, options)))
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   store.dispatch({ type: 'TEST' })
     
   if (actions.length !== 1) {
@@ -241,7 +205,7 @@ it('should transform actions - debounce', (done) => {
     actions.push(action)
     return state
   }
-  const store = createStore(reducer, applyMiddleware(orchestration(config, options)))
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   
   store.dispatch({ type: 'TEST' })
   store.dispatch({ type: 'TEST' })
@@ -276,7 +240,7 @@ it('should transform actions - delay debounce', (done) => {
     actions.push(action)
     return state
   }
-  const store = createStore(reducer, applyMiddleware(orchestration(config, options)))
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   
   store.dispatch({ type: 'TEST' })
   store.dispatch({ type: 'TEST' })
@@ -307,7 +271,7 @@ it('should fail sending request', (done) => {
       request: {
         url: 'https://non.existing.c',
         headers: {
-          'User-Agent': 'request'
+          'User-Agent': 'jest-test-request'
         },
         onSuccess: 'ADD_MESSAGE_SUCCEEDED',
         onFail: 'ADD_MESSAGE_FAILED',
@@ -324,7 +288,37 @@ it('should fail sending request', (done) => {
     actions.push(action)
     return state
   }
-  const store = createStore(reducer, applyMiddleware(orchestration(config, options)))
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
+  store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
+})
+
+it('should fail sending request - post', (done) => {
+  const actions = []
+  const options = { validate: true }
+  const config = [
+    {
+      case: 'ADD_MESSAGE_REQUESTED',
+      post: {
+        url: 'https://non.existing.c',
+        headers: {
+          'User-Agent': 'jest-test-request'
+        },
+        onSuccess: 'ADD_MESSAGE_SUCCEEDED',
+        onFail: 'ADD_MESSAGE_FAILED',
+        callback: (err) => {
+          if (actions[1].type === 'ADD_MESSAGE_FAILED') {
+            done()
+          }
+        }
+      }
+    }
+  ]
+
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
 })
 
@@ -338,7 +332,7 @@ it('should send request', (done) => {
       request: {
         url: 'https://api.github.com/users/test',
         headers: {
-          'User-Agent': 'request'
+          'User-Agent': 'jest-test-request'
         },
         onSuccess: res => ({ type: 'ADD_MESSAGE_SUCCEEDED', payload: res.body }),
         onFail: 'ADD_MESSAGE_FAILED',
@@ -355,6 +349,95 @@ it('should send request', (done) => {
     actions.push(action)
     return state
   }
-  const store = createStore(reducer, applyMiddleware(orchestration(config, options)))
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
+})
+
+it('should transform actions - cascade debounce', (done) => {
+  const options = { validate: true }
+  const config = [
+    {
+      case: [
+			  'CHAT_INPUT_SUBMITTED',
+			  'MESSANGER_INPUT_SUBMITED'
+		  ],
+      dispatch: 'ADD_MESSAGE_REQUESTED'
+    },
+    {
+      case: 'ADD_MESSAGE_REQUESTED',
+      dispatch: 'SECOND',
+      debounce: 100
+    }
+  ]
+
+  const actions = []
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
+  store.dispatch({ type: 'CHAT_INPUT_SUBMITTED' })
+  store.dispatch({ type: 'MESSANGER_INPUT_SUBMITED' })
+  store.dispatch({ type: 'CHAT_INPUT_SUBMITTED' })
+  
+  setTimeout(() => {
+    if (
+      actions[1].type === 'ADD_MESSAGE_REQUESTED',
+      actions[2].type === 'ADD_MESSAGE_REQUESTED',
+      actions[3].type === 'ADD_MESSAGE_REQUESTED',
+      actions[4].type === 'SECOND'
+    ) {
+      done()
+    } else {
+      done.fail()
+    }
+  }, 200)
+  
+})
+
+it('should fail sending request - debounce', (done) => {
+  const actions = []
+  const options = { validate: true }
+  const config = [
+    {
+      case: [
+			  'CHAT_INPUT_SUBMITTED',
+			  'MESSANGER_INPUT_SUBMITED'
+		  ],
+      dispatch: 'ADD_MESSAGE_REQUESTED'
+    },
+    {
+      case: 'ADD_MESSAGE_REQUESTED',
+      debounce: 200,
+      request: {
+        url: 'https://non.existing.c',
+        headers: {
+          'User-Agent': 'jest-test-request'
+        },
+        onSuccess: 'ADD_MESSAGE_SUCCEEDED',
+        onFail: 'ADD_MESSAGE_FAILED',
+        callback: () => {
+          if (
+            actions[1].type === 'ADD_MESSAGE_REQUESTED',
+            actions[2].type === 'ADD_MESSAGE_REQUESTED',
+            actions[3].type === 'ADD_MESSAGE_REQUESTED',
+            actions[4].type === 'ADD_MESSAGE_FAILED'
+          ) {
+            done()
+          } else {
+            done.fail()
+          }
+        }
+      }
+    }
+  ]
+
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
+  store.dispatch({ type: 'CHAT_INPUT_SUBMITTED' })
+  store.dispatch({ type: 'MESSANGER_INPUT_SUBMITED' })
+  store.dispatch({ type: 'CHAT_INPUT_SUBMITTED' })
 })
