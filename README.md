@@ -43,7 +43,7 @@ It's probably better to **describe what actually happened** rather than expressi
 const processManager = [
   {
     case: [
-      'SEND_MESSAGE_BUTTON_CLICKED',
+      SEND_MESSAGE_BUTTON_CLICKED,
       'MESSAGE_INPUT_ENTER_KEY_PRESSED'
     ],
     dispatch: 'ADD_MESSAGE'
