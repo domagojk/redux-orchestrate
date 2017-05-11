@@ -253,9 +253,6 @@ it('should fail sending request', (done) => {
       case: 'ADD_MESSAGE_REQUESTED',
       request: {
         url: 'https://non.existing.c',
-        headers: {
-          'User-Agent': 'jest-test-request'
-        },
         onSuccess: 'ADD_MESSAGE_SUCCEEDED',
         onFail: 'ADD_MESSAGE_FAILED',
         callback: () => {
@@ -283,9 +280,6 @@ it('should fail sending request - post', (done) => {
       case: 'ADD_MESSAGE_REQUESTED',
       post: {
         url: 'https://non.existing.c',
-        headers: {
-          'User-Agent': 'jest-test-request'
-        },
         onSuccess: 'ADD_MESSAGE_SUCCEEDED',
         onFail: 'ADD_MESSAGE_FAILED',
         callback: (err) => {
@@ -314,14 +308,13 @@ it('should send request', (done) => {
       case: 'ADD_MESSAGE_REQUESTED',
       request: {
         url: 'https://api.github.com/users/test',
-        headers: {
-          'User-Agent': 'jest-test-request'
-        },
-        onSuccess: res => ({ type: 'ADD_MESSAGE_SUCCEEDED', payload: res.body }),
+        onSuccess: res => ({ type: 'ADD_MESSAGE_SUCCEEDED', payload: res.data }),
         onFail: 'ADD_MESSAGE_FAILED',
         callback: () => {
           if (actions[1].type === 'ADD_MESSAGE_SUCCEEDED' && actions[1].payload.login === 'test') {
             done()
+          } else {
+            done.fail()
           }
         }
       }
@@ -394,9 +387,6 @@ it('should fail sending request - debounce', (done) => {
       debounce: 200,
       request: {
         url: 'https://non.existing.c',
-        headers: {
-          'User-Agent': 'jest-test-request'
-        },
         onSuccess: 'ADD_MESSAGE_SUCCEEDED',
         onFail: 'ADD_MESSAGE_FAILED',
         callback: () => {
@@ -433,15 +423,19 @@ it('should cancel sending request', (done) => {
       case: 'ADD_MESSAGE_REQUESTED',
       request: {
         url: 'https://api.github.com/users/test',
-        headers: {
-          'User-Agent': 'jest-test-request'
-        },
         onFail: 'ON_FAIL',
         onSuccess: 'ON_SUCCESS',
         cancelWhen: [
           'CANCEL_EVENT',
           'CANCEL_EVENT_SECOND'
-        ]
+        ],
+        callback: (err) => {
+          if (err.message.type === 'CANCEL_EVENT') {
+            done()
+          } else {
+            done.fail()
+          }
+        }
       }
     }
   ]
@@ -456,12 +450,4 @@ it('should cancel sending request', (done) => {
   setTimeout(() => {
     store.dispatch({ type: 'CANCEL_EVENT' })
   }, 50)
-
-  setTimeout(() => {
-    if (actions.length === 1) {
-      done()
-    } else {
-      done.fail()
-    }
-  }, 100)
 })

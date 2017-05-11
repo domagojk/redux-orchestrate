@@ -1,4 +1,5 @@
-import request from 'request'
+import axios from 'axios'
+const CancelToken = axios.CancelToken
 
 function forceArray (arr) {
   if (!Array.isArray(arr)) return [arr]
@@ -63,34 +64,34 @@ const orchestrate = (config, options) => store => next => originalAction => {
     
         let requestConfig = ruleConfig.request
         if (ruleConfig.get) {
-          requestConfig = {...ruleConfig.get, method: 'GET'}
+          requestConfig = {...ruleConfig.get, method: 'get'}
         }
         if (ruleConfig.post) {
-          requestConfig = {...ruleConfig.post, method: 'POST'}
+          requestConfig = {...ruleConfig.post, method: 'post'}
         }
         if (ruleConfig.put) {
-          requestConfig = {...ruleConfig.put, method: 'PUT'}
+          requestConfig = {...ruleConfig.put, method: 'put'}
         }
         if (ruleConfig.patch) {
-          requestConfig = {...ruleConfig.patch, method: 'PATCH'}
+          requestConfig = {...ruleConfig.patch, method: 'patch'}
         }
         if (ruleConfig.del) {
-          requestConfig = {...ruleConfig.del, method: 'DELETE'}
+          requestConfig = {...ruleConfig.del, method: 'delete'}
         }
         if (ruleConfig.head) {
-          requestConfig = {...ruleConfig.head, method: 'HEAD'}
+          requestConfig = {...ruleConfig.head, method: 'head'}
         }
         if (ruleConfig.options) {
-          requestConfig = {...ruleConfig.options, method: 'OPTIONS'}
+          requestConfig = {...ruleConfig.options, method: 'options'}
         }
         
         if (
-          rule._req &&
+          rule._cancelFn &&
           requestConfig && 
           requestConfig.cancelWhen && 
           requestConfig.cancelWhen.indexOf(action.type) !== -1
         ) {
-          rule._req.abort()
+          rule._cancelFn()
         }
 
         if (action.type === c) {
@@ -101,20 +102,12 @@ const orchestrate = (config, options) => store => next => originalAction => {
             }
 
             if (requestConfig) {
-              rule._req = request({
-                json: true,
+              axios({
                 ...requestConfig,
-                callback: function (err, res) {
-                  if (err && requestConfig.onFail) {
-                    let onFailAction = requestConfig.onFail
-                    if (typeof requestConfig.onFail === 'string') {
-                      onFailAction = {type: requestConfig.onFail}
-                    } else if (typeof requestConfig.onFail === 'function') {
-                      onFailAction = requestConfig.onFail(res)
-                    }
-                    internalNext(onFailAction)
-                  }
-                  if (!err && requestConfig.onSuccess) {
+                cancelToken: new CancelToken(c => rule._cancelFn = c)
+              })
+                .then(res => {
+                  if (requestConfig.onSuccess) {
                     let onSuccessAction = requestConfig.onSuccess
                     if (typeof requestConfig.onSuccess === 'string') {
                       onSuccessAction = {type: requestConfig.onSuccess}
@@ -125,10 +118,27 @@ const orchestrate = (config, options) => store => next => originalAction => {
                   }
 
                   if (requestConfig.callback) {
-                    requestConfig.callback(err, res)
+                    requestConfig.callback(null, res)
                   }
-                }
-              })
+                })
+                .catch(err => {
+                  if (
+                    requestConfig.onFail &&
+                    !(err && err.message && err.message.type === 'CANCEL_EVENT')
+                  ) {
+                    let onFailAction = requestConfig.onFail
+                    if (typeof requestConfig.onFail === 'string') {
+                      onFailAction = {type: requestConfig.onFail}
+                    } else if (typeof requestConfig.onFail === 'function') {
+                      onFailAction = requestConfig.onFail(res)
+                    }
+                    internalNext(onFailAction)
+                  }
+
+                  if (requestConfig.callback) {
+                    requestConfig.callback(err)
+                  }
+                })
             }
           })
           
