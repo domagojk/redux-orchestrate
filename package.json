@@ -36,7 +36,5 @@
   },
   "dependencies": {
     "axios": "^0.16.1"
-  },
-  "collectCoverage": true,
-  "coverageDirectory": "./coverage/"
+  }
 }

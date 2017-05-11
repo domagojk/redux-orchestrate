@@ -1,29 +1,8 @@
 import axios from 'axios'
+import forceArray from './forceArray'
+import timeTransform from './timeTransform'
+
 const CancelToken = axios.CancelToken
-
-function forceArray (arr) {
-  if (!Array.isArray(arr)) return [arr]
-  return arr
-}
-
-function delayDubounce (action, options, callback) {
-  const { debounce, delay, _debounceTimeoutRefs } = options
-  let cb = callback
-  if (delay) {
-    cb = (action) => setTimeout(() => callback(), delay)
-  }
-
-  if (debounce) {
-    clearTimeout(_debounceTimeoutRefs[action.type])
-    _debounceTimeoutRefs[action.type] = setTimeout(() => {
-      delete _debounceTimeoutRefs[action.type]
-      cb()
-    }, debounce)
-
-  } else {
-    cb()
-  }
-}
 
 const orchestrate = (config, options) => store => next => originalAction => {
   if (!Array.isArray(config)) {
@@ -40,7 +19,6 @@ const orchestrate = (config, options) => store => next => originalAction => {
   }
 
   function checkAction (action) {
-    let matched = false
     config.forEach(rule => {
       if (typeof rule._debounceTimeoutRefs !== 'object') {
         rule._debounceTimeoutRefs = {}
@@ -89,8 +67,7 @@ const orchestrate = (config, options) => store => next => originalAction => {
         }
 
         if (action.type === c) {
-          matched = true
-          delayDubounce(action, ruleConfig, () => {
+          timeTransform(action, ruleConfig, () => {
             if (dispatchAction) {
               internalNext(dispatchAction)
             }
@@ -139,7 +116,6 @@ const orchestrate = (config, options) => store => next => originalAction => {
         }
       })
     })
-    return matched
   }
   checkAction(originalAction)
 }

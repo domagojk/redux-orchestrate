@@ -1,4 +1,4 @@
-import orchestrate from '../src/index'
+import orchestrate from './index'
 import { createStore, applyMiddleware } from 'redux'
 
 function getActions(config, options, dispatcher) {
