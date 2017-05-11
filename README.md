@@ -8,6 +8,8 @@ redux-orchestrate acts like a central coordinator for dispatched actions.
 
 The concept is similar to middlewares like [redux-observable](https://github.com/redux-observable/redux-observable) and [redux-saga](https://github.com/redux-saga/redux-saga) however it is **less powerful**, but **more simple**.
 
+Rather then using generators or Observables, everything is defined using an array of objects.
+
 ## Installation
 ```bash
 npm install --save redux-orchestrate
@@ -25,8 +27,6 @@ const processManager = [
 
 const store = createStore(reducer, applyMiddleware(orchestrate(processManager)))
 ```
-
-Rather then using generators or Observables, everything is defined using an array of objects.
 
 ### Tranforming actions
 Suppose you are building a facebook-like chat app.
