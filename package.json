@@ -4,7 +4,7 @@
   "description": "Redux middleware for coordinating actions and handling side effects.",
   "main": "index.js",
   "scripts": {
-    "test": "jest && codecov",
+    "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "codecov": "jest && codecov --token=d3717906-3f60-47ed-9bc9-2983b6daaab0",
