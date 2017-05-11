@@ -1,14 +1,14 @@
 {
   "name": "redux-orchestrate",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Redux middleware for coordinating actions and handling side effects.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "codecov": "jest && codecov --token=d3717906-3f60-47ed-9bc9-2983b6daaab0",
-    "build": "babel src -d ./"
+    "build": "babel src -d ./lib"
   },
   "keywords": [
     "redux",
