@@ -5,6 +5,7 @@
 
 # Redux Orchestrate
 redux-orchestrate acts like a central coordinator for dispatched actions.
+
 The concept is similar to middlewares like [redux-observable](https://github.com/redux-observable/redux-observable) and [redux-saga](https://github.com/redux-saga/redux-saga) however it is **less powerful**, but **more simple**.
 
 ## Installation
@@ -12,6 +13,7 @@ The concept is similar to middlewares like [redux-observable](https://github.com
 npm install --save redux-orchestrate
 ```
 
+## Usage
 ```javascript
 import { createStore, applyMiddleware } from 'redux'
 import orchestrate from 'redux-orchestrate'
@@ -24,7 +26,6 @@ const processManager = [
 const store = createStore(reducer, applyMiddleware(orchestrate(processManager)))
 ```
 
-## Usage
 Rather then using generators or Observables, everything is defined using an array of objects.
 
 ### Tranforming actions
@@ -39,7 +40,7 @@ What if, later on, you decide to ignore enter key strokes or better still, chang
 It's probably better to **describe what actually happened** rather than expressing your intent and **trasform** those actions into something you will use in reducer:
 
 ```javascript
-[
+const processManager = [
   {
     case: [
       'SEND_MESSAGE_BUTTON_CLICKED',
@@ -59,7 +60,7 @@ Luckily, we decided to dispatch facts rather then intents, so we can distinguish
 All we need to do now, is send this data to some server:
 
 ```javascript
-[
+const processManager = [
   {
     case: [
       'SEND_MESSAGE_BUTTON_CLICKED',
@@ -94,7 +95,7 @@ By default, new messages can be rendered with `sending` flag,
 then if an ajax request is completed we flag it to `sent` or `error_sending` by dispatching appropriate actions:
 
 ```javascript
-[
+const processManager = [
   {
     case: [
       'SEND_MESSAGE_BUTTON_CLICKED',
@@ -124,7 +125,7 @@ In short, these are feature requirements:
 - Don't spam "suggestion server". Make the request when user had stopped typing, by debouncing its events.
 
 ```javascript
-[
+const processManager = [
   {
     case: 'SEARCH_INPUT_CHARACTER_ENTERED',   // in case user has changed an input field
     debounce: 500,                            // wait for user to stop typing (debouncing by 500ms)
