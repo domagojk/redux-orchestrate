@@ -20,7 +20,9 @@ function getLastAction(config, options, testAction) {
   })
   return actions[actions.length - 1]
 }
-
+it('should throw an error', () => {
+  expect(getLastAction).toThrow()
+})
 
 it('should dispatch action', () => {
   const testAction = { type: 'TEST' }
@@ -272,6 +274,33 @@ it('should fail sending request', (done) => {
   store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
 })
 
+it('should fail sending request - onFail function', (done) => {
+  const actions = []
+  const options = { validate: true }
+  const config = [
+    {
+      case: 'ADD_MESSAGE_REQUESTED',
+      request: {
+        url: 'https://non.existing.c',
+        onSuccess: 'ADD_MESSAGE_SUCCEEDED',
+        onFail: err => ({ type: 'ADD_MESSAGE_FAILED' }),
+        callback: () => {
+          if (actions[1].type === 'ADD_MESSAGE_FAILED') {
+            done()
+          }
+        }
+      }
+    }
+  ]
+
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
+  store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
+})
+
 it('should fail sending request - post', (done) => {
   const actions = []
   const options = { validate: true }
@@ -312,6 +341,36 @@ it('should send request', (done) => {
         onFail: 'ADD_MESSAGE_FAILED',
         callback: () => {
           if (actions[1].type === 'ADD_MESSAGE_SUCCEEDED' && actions[1].payload.login === 'test') {
+            done()
+          } else {
+            done.fail()
+          }
+        }
+      }
+    }
+  ]
+
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
+  store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
+})
+
+it('should send request - onSuccess string', (done) => {
+  // this test is depending on github api
+  const actions = []
+  const options = { validate: true }
+  const config = [
+    {
+      case: 'ADD_MESSAGE_REQUESTED',
+      request: {
+        url: 'https://api.github.com/users/test',
+        onSuccess: 'ADD_MESSAGE_SUCCEEDED',
+        onFail: 'ADD_MESSAGE_FAILED',
+        callback: () => {
+          if (actions[1].type === 'ADD_MESSAGE_SUCCEEDED') {
             done()
           } else {
             done.fail()

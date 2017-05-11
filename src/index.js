@@ -63,27 +63,21 @@ const orchestrate = (config, options) => store => next => originalAction => {
         }
     
         let requestConfig = ruleConfig.request
-        if (ruleConfig.get) {
-          requestConfig = {...ruleConfig.get, method: 'get'}
+
+        const supportMethods = {
+          get: 'get',
+          post: 'post',
+          put: 'put',
+          patch: 'patch',
+          del: 'delete',
+          head: 'head',
+          options: 'options'
         }
-        if (ruleConfig.post) {
-          requestConfig = {...ruleConfig.post, method: 'post'}
-        }
-        if (ruleConfig.put) {
-          requestConfig = {...ruleConfig.put, method: 'put'}
-        }
-        if (ruleConfig.patch) {
-          requestConfig = {...ruleConfig.patch, method: 'patch'}
-        }
-        if (ruleConfig.del) {
-          requestConfig = {...ruleConfig.del, method: 'delete'}
-        }
-        if (ruleConfig.head) {
-          requestConfig = {...ruleConfig.head, method: 'head'}
-        }
-        if (ruleConfig.options) {
-          requestConfig = {...ruleConfig.options, method: 'options'}
-        }
+        Object.keys(supportMethods).forEach(method => {
+          if (ruleConfig[method]) {
+            requestConfig = {...ruleConfig[method], method: supportMethods[method]}
+          }
+        })
         
         if (
           rule._cancelFn &&
@@ -130,7 +124,7 @@ const orchestrate = (config, options) => store => next => originalAction => {
                     if (typeof requestConfig.onFail === 'string') {
                       onFailAction = {type: requestConfig.onFail}
                     } else if (typeof requestConfig.onFail === 'function') {
-                      onFailAction = requestConfig.onFail(res)
+                      onFailAction = requestConfig.onFail(err)
                     }
                     internalNext(onFailAction)
                   }
