@@ -44,9 +44,9 @@ const processManager = [
   {
     case: [
       SEND_MESSAGE_BUTTON_CLICKED,
-      'MESSAGE_INPUT_ENTER_KEY_PRESSED'
+      MESSAGE_INPUT_ENTER_KEY_PRESSED
     ],
-    dispatch: 'ADD_MESSAGE'
+    dispatch: ADD_MESSAGE
   }
 ]
 ```
@@ -63,17 +63,17 @@ All we need to do now, is send this data to some server:
 const processManager = [
   {
     case: [
-      'SEND_MESSAGE_BUTTON_CLICKED',
-      'MESSAGE_INPUT_ENTER_KEY_PRESSED'
+      SEND_MESSAGE_BUTTON_CLICKED,
+      MESSAGE_INPUT_ENTER_KEY_PRESSED
     ],
-    dispatch: 'ADD_MESSAGE'
+    dispatch: ADD_MESSAGE
   },
   {
    case: [
       // list of all events we wish to track
-      'SEND_MESSAGE_BUTTON_CLICKED',
-      'MESSAGE_INPUT_ENTER_KEY_PRESSED',
-      'MESSAGE_DELETE_BUTTON_CLICKED'
+      SEND_MESSAGE_BUTTON_CLICKED,
+      MESSAGE_INPUT_ENTER_KEY_PRESSED,
+      MESSAGE_DELETE_BUTTON_CLICKED
     ],
     post: action => ({
       url: 'https://analytics.server.com',
@@ -98,20 +98,20 @@ then if an ajax request is completed we flag it to `sent` or `error_sending` by 
 const processManager = [
   {
     case: [
-      'SEND_MESSAGE_BUTTON_CLICKED',
-      'MESSAGE_INPUT_ENTER_KEY_PRESSED'
+      SEND_MESSAGE_BUTTON_CLICKED,
+      MESSAGE_INPUT_ENTER_KEY_PRESSED
     ],
-    dispatch: 'ADD_MESSAGE'
+    dispatch: ADD_MESSAGE
   },
   {
-    case: 'ADD_MESSAGE',
+    case: ADD_MESSAGE,
     post: a => ({
       url: 'https://chat.app.com/new',
       data: {
         content: a.payload
       },
-      onSuccess: { type: 'MESSAGE_SENT', id: a.id },
-      onFail: { type: 'MESSAGE_SENDING_ERROR', id: a.id },
+      onSuccess: { type: MESSAGE_SENT, id: a.id },
+      onFail: { type: MESSAGE_SENDING_ERROR, id: a.id },
     })
   }
 ]
@@ -127,16 +127,16 @@ In short, these are feature requirements:
 ```javascript
 const processManager = [
   {
-    case: 'SEARCH_INPUT_CHARACTER_ENTERED',   // in case user has changed an input field
+    case: SEARCH_INPUT_CHARACTER_ENTERED,   // in case user has changed an input field
     debounce: 500,                            // wait for user to stop typing (debouncing by 500ms)
     get: action => ({
       url: `http://s.com/${action.payload}`,  // make a get request to a "suggestion server"
       cancelWhen: [
-        'SEARCH_INPUT_CHARACTER_ENTERED',     // in case user starts typing again, cancel request
-        'SEARCH_INPUT_BLURED'                 // in case user is not using an input field, cancel request
+        SEARCH_INPUT_CHARACTER_ENTERED,     // in case user starts typing again, cancel request
+        SEARCH_INPUT_BLURED                 // in case user is not using an input field, cancel request
       ],
       onSuccess: res => ({
-        type: 'AUTOCOMPLETE_SUGGESTION',      // if query was successful, dispatch an event
+        type: AUTOCOMPLETE_SUGGESTION,      // if query was successful, dispatch an event
         payload: res.data 
       })
     })
@@ -158,21 +158,21 @@ A term "process manager" is borrowed from [CQRS/ES terminology](https://msdn.mic
 const processManager = [
   {
     case: [
-      'IN_CASE_THIS_EVENT_IS_DISPATCHED',
-      'OR_THIS_EVENT'
+      IN_CASE_THIS_EVENT_IS_DISPATCHED,
+      OR_THIS_EVENT
     ],
-    dispatch: 'DISPATCH_THAT_EVENT',
+    dispatch: DISPATCH_THAT_EVENT,
     debounce: 500,
     delay: 500,
     request: {
       method: 'get',
       url: 'url',
       cancelWhen: [
-        'IF_REQUEST_IS_PENDING_CANCEL_IT_WHEN_THIS_IS_DISPATCHED',
-        'OR_THIS'
+        IF_REQUEST_IS_PENDING_CANCEL_IT_WHEN_THIS_IS_DISPATCHED,
+        OR_THIS
       ],
-      onSuccess: 'DISPATCH_THIS_IF_AJAX_SUCCEDED'
-      onFail: 'DISPATCH_THIS_IF_AJAX_FAILED',
+      onSuccess: DISPATCH_THIS_IF_AJAX_SUCCEDED
+      onFail: DISPATCH_THIS_IF_AJAX_FAILED,
       // other axios props
     }
   }
