@@ -126,20 +126,20 @@ In short, these are feature requirements:
 ```javascript
 [
   {
-		case: 'SEARCH_INPUT_CHARACTER_ENTERED',   // in case user has changed an input field
-		debounce: 500,                            // wait for user to stop typing (debouncing by 500ms)
-		get: action => ({
-			url: `http://s.com/${action.payload}`,  // make a get request to a "suggestion server"
-			cancelWhen: [
-				'SEARCH_INPUT_CHARACTER_ENTERED',     // in case user starts typing again, cancel request
-				'SEARCH_INPUT_BLURED'                 // in case user is not using an input field, cancel request
-			],
-			onSuccess: res => ({
+    case: 'SEARCH_INPUT_CHARACTER_ENTERED',   // in case user has changed an input field
+    debounce: 500,                            // wait for user to stop typing (debouncing by 500ms)
+    get: action => ({
+      url: `http://s.com/${action.payload}`,  // make a get request to a "suggestion server"
+      cancelWhen: [
+        'SEARCH_INPUT_CHARACTER_ENTERED',     // in case user starts typing again, cancel request
+        'SEARCH_INPUT_BLURED'                 // in case user is not using an input field, cancel request
+      ],
+      onSuccess: res => ({
         type: 'AUTOCOMPLETE_SUGGESTION',      // if query was successful, dispatch an event
         payload: res.data 
       })
-		})
-	}
+    })
+  }
 ]
 ```
 
