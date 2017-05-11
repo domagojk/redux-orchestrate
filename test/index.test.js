@@ -449,5 +449,5 @@ it('should cancel sending request', (done) => {
 
   setTimeout(() => {
     store.dispatch({ type: 'CANCEL_EVENT' })
-  }, 50)
+  }, 0)
 })
