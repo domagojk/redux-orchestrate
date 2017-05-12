@@ -144,6 +144,27 @@ const processManager = [
 ]
 ```
 
+## FAQ
+
+### What about other kind of async operations?
+This middleware supports following async operations:
+- making a network request
+- canceling pending network requests
+- debouncing
+- delaying
+
+Note: additional operators could be supported in the future (but only if they will not require for current API to change, making it more complex).
+
+If these operations are not enough for your use-case, you'll should use another middleware (alongside this one or all together).
+My suggestion is [redux-observable](https://github.com/redux-observable/redux-observable).
+
+### Can I use custom headers or similar options for ajax requests?
+Yes.
+
+redux-orchestrate uses [axios](https://github.com/mzabriskie/axios) for making network requests.
+
+All options passed in `request` (or aliases like `post`, `get`, etc.) is mapped with [axios request config](https://github.com/mzabriskie/axios#request-config)
+
 ## API
 
 ### Applying middleware:
@@ -270,7 +291,7 @@ Dispatch event or make a request, after an action is delayed
 ### Options
 
 #### Validate
-If defined, no events will reach a reducer unless it's defined in process manager.
+If defined, no events will reach a reducer unless it's defined in a process manager.
 
 ```javascript
 {
