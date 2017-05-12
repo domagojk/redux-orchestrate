@@ -147,16 +147,16 @@ const processManager = [
 ## FAQ
 
 ### What about other kind of async operations?
-This middleware supports following async operations:
+For handling side-effects, this middleware supports:
 - making a network request
 - canceling pending network requests
 - debouncing
 - delaying
 
-Note: additional operators could be supported in the future (but only if they will not require for current API to change, making it more complex).
-
-If these operations are not enough for your use-case, you'll should use another middleware (alongside this one or all together).
+If these operations are not enough for your use-case, you should use another middleware (alongside this one or all together).
 My suggestion is [redux-observable](https://github.com/redux-observable/redux-observable).
+
+**Note**: additional operators could be supported in the future (but only if they will not require for current API to change, making it more complex).
 
 ### Can I use custom headers or similar options for ajax requests?
 Yes.
