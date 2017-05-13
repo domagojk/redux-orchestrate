@@ -6,9 +6,9 @@
 # Redux Orchestrate
 redux-orchestrate acts like a central coordinator for dispatched actions.
 
-The concept is similar to middlewares like [redux-observable](https://github.com/redux-observable/redux-observable) and [redux-saga](https://github.com/redux-saga/redux-saga) however it is **less powerful**, but **more simple**.
+The concept is similar to middlewares like [redux-observable](https://github.com/redux-observable/redux-observable) and [redux-saga](https://github.com/redux-saga/redux-saga) however it is **less powerful** but **more simple**.
 
-Rather then using generators or Observables, everything is defined using an array of objects.
+Rather than using generators or Observables, everything is defined using an array of objects.
 
 ## Installation
 ```bash
@@ -32,12 +32,12 @@ const store = createStore(reducer, applyMiddleware(orchestrate(processManager)))
 Suppose you are building a facebook-like chat app.
 Any time `ADD_MESSAGE` action is dispatched, redux reducer is pushing messages in an array.
 
-`ADD_MESSAGE` is dispatched when an user clicks on a *send button* or hits the enter key.
+`ADD_MESSAGE` is dispatched when a user clicks on a *send button* or hits the enter key.
 
-But by directly dispatching `ADD_MESSAGE`, your component must be aware of its enviroment.
-What if, later on, you decide to ignore enter key strokes or better still, change `ADD_MESSAGE` to something like `SHOW_MESSAGE_PREVIEW`?
+But by directly dispatching `ADD_MESSAGE`, your component must be aware of its environment.
+What if, later on, you decide to ignore enter keystrokes or better still, change `ADD_MESSAGE` to something like `SHOW_MESSAGE_PREVIEW`?
 
-It's probably better to **describe what actually happened** rather than expressing your intent and **trasform** those actions into something you will use in reducer:
+It's probably better to **describe what actually happened** rather than expressing your intent and **transform** those actions into something you will use in reducer:
 
 ```javascript
 const processManager = [
@@ -57,7 +57,7 @@ Maybe we should remove it then?
 
 Luckily, we decided to dispatch facts rather then intents, so we can distinguish an enter key from a button click.
 
-All we need to do now, is send this data to some server:
+All we need to do now is send this data to some server:
 
 ```javascript
 const processManager = [
@@ -149,7 +149,7 @@ const processManager = [
 ### What about other kind of async operations?
 For handling side-effects, this middleware supports:
 - making a network request
-- canceling pending network requests
+- cancelling pending network requests
 - debouncing
 - delaying
 
