@@ -4,11 +4,16 @@
 [![NPM Status](https://img.shields.io/npm/l/redux-orchestrate.svg?style=flat-square)](https://github.com/domagojk/redux-orchestrate/blob/master/LICENSE)
 
 # Redux Orchestrate
-redux-orchestrate acts like a central coordinator for dispatched actions.
+The main idea behind this middleware is to support the most common operations with a simple conifg object.
 
-The concept is similar to middlewares like [redux-observable](https://github.com/redux-observable/redux-observable) and [redux-saga](https://github.com/redux-saga/redux-saga) however it is **less powerful** but **more simple**.
+This includes:
+- intercepting and transforming actions
+- making a network request
+- cancelling pending network requests
+- debouncing
+- delaying
 
-Rather than using generators or Observables, everything is defined using an array of objects.
+redux-orchestrate uses "action in - action out" concept which is similar to other solutions like [redux-observable](https://github.com/redux-observable/redux-observable) and [redux-saga](https://github.com/redux-saga/redux-saga), but rather than using generators or Observables, everything is defined using an array of objects.
 
 ## Installation
 ```bash
@@ -52,12 +57,13 @@ const processManager = [
 ```
 
 ### Handling side-effects
-Suppose this *send button* in our imaginary app is used much more rarely than pressing the enter key.
-Maybe we should remove it then?
+Later on, you may wish to do some analytics.
 
-Luckily, we decided to dispatch facts rather then intents, so we can distinguish an enter key from a button click.
+For example, how often is *send button* used compared to pressing the enter key?
 
-All we need to do now is send this data to some server:
+This is another benefit of dispatching **facts** rather then **intents**. You don't have to make a lot changes to your codebase, because you had already distinguish the enter key from a button click. 
+
+All you need to do is define server endpoint which will collect these events:
 
 ```javascript
 const processManager = [
@@ -85,24 +91,17 @@ const processManager = [
 ]
 ```
 
-But what if a network response is an integral part of our app?
+But what if a network response is an integral part of your app?
 
-For example, chat apps often have a feature of flagging messages based on its status (`sending`, `sent`, `error_sending`).
+For example, chat apps often have a feature of flagging messages based on its status (`sending`, `sent`, `error_sending`),
+and to confirm whether a message has been sent, you need to know if a network request succeeded or failed.
 
-But, to confirm whether a message has been sent, we need to know if a network request succeeded or failed.
+For this kind of async operations you can use [observables](https://github.com/redux-observable/redux-observable), [generator functions](https://github.com/redux-saga/redux-saga) or [plain callbacks](https://github.com/gaearon/redux-thunk). 
 
-By default, new messages can be rendered with `sending` flag,
-then if an ajax request is completed we flag it to `sent` or `error_sending` by dispatching appropriate actions:
+But since using a network response for dispatching another action is so common, why not abstracting it?
 
 ```javascript
 const processManager = [
-  {
-    case: [
-      SEND_MESSAGE_BUTTON_CLICKED,
-      MESSAGE_INPUT_ENTER_KEY_PRESSED
-    ],
-    dispatch: ADD_MESSAGE
-  },
   {
     case: ADD_MESSAGE,
     post: a => ({
@@ -128,9 +127,9 @@ In short, these are feature requirements:
 const processManager = [
   {
     case: SEARCH_INPUT_CHARACTER_ENTERED,   // in case user has changed an input field
-    debounce: 500,                            // wait for user to stop typing (debouncing by 500ms)
+    debounce: 500,                          // wait for user to stop typing (debouncing by 500ms)
     get: action => ({
-      url: `http://s.com/${action.payload}`,  // make a get request to a "suggestion server"
+      url: `http://s.co/${action.payload}`, // make a get request to a "suggestion server"
       cancelWhen: [
         SEARCH_INPUT_CHARACTER_ENTERED,     // in case user starts typing again, cancel request
         SEARCH_INPUT_BLURED                 // in case user is not using an input field, cancel request
@@ -146,17 +145,12 @@ const processManager = [
 
 ## FAQ
 
-### What about other kind of async operations?
-For handling side-effects, this middleware supports:
-- making a network request
-- cancelling pending network requests
-- debouncing
-- delaying
+### Ok, but what about other kind of async operations?
+This middleware is not an attempt to solve all your problems. If you need to handle more complex async operations then you should use another middleware or define your own [(it's not that hard)](http://redux.js.org/docs/advanced/Middleware.html). 
 
-If these operations are not enough for your use-case, you should use another middleware (alongside this one or all together).
-My suggestion is [redux-observable](https://github.com/redux-observable/redux-observable).
+Also, don't forget that you can combine multiple middlewares.
 
-**Note**: additional operators could be supported in the future (but only if they will not require for current API to change, making it more complex).
+**Note**: additional operators could be supported in the future (but only if they don't significantly complicate the existing API).
 
 ### Can I use custom headers or similar options for ajax requests?
 Yes.
@@ -165,6 +159,18 @@ redux-orchestrate uses [axios](https://github.com/mzabriskie/axios) for making n
 
 All options passed in `request` (or aliases like `post`, `get`, etc.) is mapped with [axios request config](https://github.com/mzabriskie/axios#request-config)
 
+### What is a process manager?
+Config object which defines the middleware logic is here reffered as "process manager".
+
+This term is borrowed from [CQRS/ES terminology](https://msdn.microsoft.com/en-us/library/jj591569.aspx) where the same concept is interestingly reffered as "saga" - "a piece of code that coordinates and routes messages between *bounded contexts* and *aggregates*". Obviously we keep reinventing the same (or similar) things using the same terminology.
+
+Also, the idea of using **facts** rather then **intents** suggested in examples, originates [from event sourced systems](https://www.youtube.com/watch?v=8JKjvY4etTY).
+
+### Why "orchestrate"?
+Term "orchestrate" is used to reffer to a single, central point for coordinating multiple entities and making them less coupled.
+
+This is a broad term, usually used in [service-oriented arhitectures](https://en.wikipedia.org/wiki/Service-oriented_architecture) and [compared with its opossite concept](https://www.infoq.com/news/2008/09/Orchestration) - "choreography"
+
 ## API
 
 ### Applying middleware:
@@ -172,8 +178,6 @@ All options passed in `request` (or aliases like `post`, `get`, etc.) is mapped 
 
 ### Process Manager
 The main array of objects defining action coordination.
-
-A term "process manager" is borrowed from [CQRS/ES terminology](https://msdn.microsoft.com/en-us/library/jj591569.aspx) which has a similar function in these systems.
 
 ```javascript
 const processManager = [
