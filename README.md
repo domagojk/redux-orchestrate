@@ -34,15 +34,6 @@ const store = createStore(reducer, applyMiddleware(orchestrate(processManager)))
 ```
 
 ### Tranforming actions
-Suppose you are building a facebook-like chat app.
-Any time `ADD_MESSAGE` action is dispatched, redux reducer is pushing messages in an array.
-
-`ADD_MESSAGE` is dispatched when a user clicks on a *send button* or hits the enter key.
-
-But by directly dispatching `ADD_MESSAGE`, your component must be aware of its environment.
-What if, later on, you decide to ignore enter keystrokes or better still, change `ADD_MESSAGE` to something like `SHOW_MESSAGE_PREVIEW`?
-
-It's probably better to **describe what actually happened** rather than expressing your intent and **transform** those actions into something you will use in reducer:
 
 ```javascript
 const processManager = [
@@ -56,8 +47,19 @@ const processManager = [
 ]
 ```
 
+Why would you do this?
+
+Well, suppose you are building a facebook-like chat app.
+Every time the `ADD_MESSAGE` action is dispatched, redux reducer is pushing new messages to an array.
+
+But, this approach forces component to be aware of its environment.
+So, even though someone "had clicked on a send button", this fact is never dispatched and a decision on what should happen next is made at "the component level".
+
+If however, there is a layer where you can **transform** `SEND_MESSAGE_BUTTON_CLICKED` to `ADD_MESSAGE`,
+you would end up decoupling reducers from components, making both more isolated and reusable.
+
 ### Handling side-effects
-Later on, you may wish to do some analytics.
+What if, later on, you wish to do some analytics on your app?
 
 For example, how often is *send button* used compared to pressing the enter key?
 
