@@ -13,7 +13,7 @@ This includes:
 - debouncing
 - delaying
 
-redux-orchestrate uses similar (DDD/ES/CQRS inspired) solution used in [redux-saga](https://github.com/redux-saga/redux-saga) and [redux-observable](https://github.com/redux-observable/redux-observable), but rather than using generators or Observables, everything is defined with an array of objects.
+redux-orchestrate uses similar (DDD/ES/CQRS inspired) solution as in [redux-saga](https://github.com/redux-saga/redux-saga) and [redux-observable](https://github.com/redux-observable/redux-observable), but rather than using generators or Observables, everything is defined with an array of objects.
 
 ## Installation
 ```bash
