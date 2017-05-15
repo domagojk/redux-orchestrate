@@ -216,7 +216,7 @@ All options passed in `request` (or aliases like `post`, `get`, etc.) is mapped 
 ### What is a process manager?
 Config object which defines the middleware logic is here reffered as "process manager".
 
-This term is borrowed from [CQRS/ES terminology](https://msdn.microsoft.com/en-us/library/jj591569.aspx) where the same concept is also reffered as "saga" - "a piece of code that coordinates and routes messages between *bounded contexts* and *aggregates*".
+This term is borrowed from [CQRS/ES terminology](https://msdn.microsoft.com/en-us/library/jj591569.aspx) where the same concept is also referred as "saga" - "a piece of code that coordinates and routes messages between *bounded contexts* and *aggregates*".
 
 Also, the idea of using **facts** rather then **intents** suggested in examples, originates [from event sourced systems](https://www.youtube.com/watch?v=8JKjvY4etTY).
 
