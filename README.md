@@ -144,11 +144,63 @@ const processManager = [
   }
 ]
 ```
+### More complex logic
+If you need to perform some kind of logic before dispatching another action, you can use the fact that `dispatch` and `request` (or aliases like `post`, `get`, etc.) can be defined as a function:
+
+```javascript
+const processManager = [
+  {
+    case: [
+      SEND_MESSAGE_BUTTON_CLICKED,
+      MESSAGE_INPUT_ENTER_KEY_PRESSED
+    ],
+    dispatch: (action, state) => {
+      if (state.canAddMessage) {
+        return { ...action, type: ADD_MESSAGE }
+      }
+    }
+  }
+]
+```
+
+You can also "cascade definitions" to perform even more complex logic:
+
+```javascript
+const processManager = [
+  {
+    case: ADD_MESSAGE,
+    post: (action, state) => ({
+      url: 'https://chat.app.com/new',
+      data: {
+        content: action.payload
+      },
+      onSuccess: () => {
+        if (state.canMarkAsSent) {
+          return { ...action, type: MESSAGE_SENT }
+        } else {
+          return { ...action, type: FOR_SOME_REASON_THIS_IS_DISPATHCED }
+        }
+       }
+    })
+  },
+  {
+    case: FOR_SOME_REASON_THIS_IS_DISPATHCED
+    post: (action, state) => ({
+      url: 'https://what.is.happening',
+      data: {
+        content: action.payload
+      },
+      onSuccess: MESSAGE_SENT,
+      onFail: MESSAGE_SENDING_ERROR
+    })
+  }
+]
+```
 
 ## FAQ
 
 ### Ok, but what about other kind of async operations?
-This middleware is not an attempt to solve all your problems. If you need to handle more complex async operations then you should use another middleware or define your own [(it's not that hard)](http://redux.js.org/docs/advanced/Middleware.html). 
+This middleware is not an attempt to solve all your problems. If you need to handle more complex async operations which are better solved by some other tools (generators, observables), then you should use these or define your own (([it's not that hard](http://redux.js.org/docs/advanced/Middleware.html)). 
 
 Also, don't forget that you can combine multiple middlewares.
 
