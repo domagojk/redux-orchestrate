@@ -4,7 +4,7 @@
 [![NPM Status](https://img.shields.io/npm/l/redux-orchestrate.svg?style=flat-square)](https://github.com/domagojk/redux-orchestrate/blob/master/LICENSE)
 
 # Redux Orchestrate
-The main idea behind this middleware is to support the most common operations with a simple config object.
+The main idea behind this middleware is to implement a "process manager pattern" ([1](https://survivejs.com/blog/redux-saga-interview/), [2](https://survivejs.com/blog/redux-saga-interview/#sagas)) and support the most common operations with a simple config object.
 
 This includes:
 - intercepting and transforming actions
@@ -13,7 +13,7 @@ This includes:
 - debouncing
 - delaying
 
-redux-orchestrate uses "action in - action out" concept which is similar to other solutions like [redux-observable](https://github.com/redux-observable/redux-observable) and [redux-saga](https://github.com/redux-saga/redux-saga), but rather than using generators or Observables, everything is defined using an array of objects.
+redux-orchestrate uses similar (DDD/ES/CQRS inspired) solution used in [redux-saga](https://github.com/redux-saga/redux-saga) and [redux-observable](https://github.com/redux-observable/redux-observable), but rather than using generators or Observables, everything is defined with an array of objects.
 
 ## Installation
 ```bash
@@ -216,7 +216,7 @@ All options passed in `request` (or aliases like `post`, `get`, etc.) is mapped 
 ### What is a process manager?
 Config object which defines the middleware logic is here reffered as "process manager".
 
-This term is borrowed from [CQRS/ES terminology](https://msdn.microsoft.com/en-us/library/jj591569.aspx) where the same concept is interestingly reffered as "saga" - "a piece of code that coordinates and routes messages between *bounded contexts* and *aggregates*". Obviously we keep reinventing the same (or similar) things using the same terminology.
+This term is borrowed from [CQRS/ES terminology](https://msdn.microsoft.com/en-us/library/jj591569.aspx) where the same concept is also reffered as "saga" - "a piece of code that coordinates and routes messages between *bounded contexts* and *aggregates*".
 
 Also, the idea of using **facts** rather then **intents** suggested in examples, originates [from event sourced systems](https://www.youtube.com/watch?v=8JKjvY4etTY).
 
