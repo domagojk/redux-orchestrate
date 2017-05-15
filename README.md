@@ -4,7 +4,7 @@
 [![NPM Status](https://img.shields.io/npm/l/redux-orchestrate.svg?style=flat-square)](https://github.com/domagojk/redux-orchestrate/blob/master/LICENSE)
 
 # Redux Orchestrate
-The main idea behind this middleware is to support the most common operations with a simple conifg object.
+The main idea behind this middleware is to support the most common operations with a simple config object.
 
 This includes:
 - intercepting and transforming actions
