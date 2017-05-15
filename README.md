@@ -200,7 +200,7 @@ const processManager = [
 ## FAQ
 
 ### Ok, but what about other kind of async operations?
-This middleware is not an attempt to solve all your problems. If you need to handle more complex async operations which are better solved by some other tools (generators, observables), then you should use these or define your own (([it's not that hard](http://redux.js.org/docs/advanced/Middleware.html)). 
+This middleware is not an attempt to solve all your problems. If you need to handle more complex async operations which are better solved by some other tools (generators, observables), then you should use middlewares that supports them or define your own ([it's not that hard](http://redux.js.org/docs/advanced/Middleware.html)). 
 
 Also, don't forget that you can combine multiple middlewares.
 
