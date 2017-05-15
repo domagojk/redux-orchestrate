@@ -359,7 +359,7 @@ it('should send request', (done) => {
   const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
 })
-*/
+
 
 it('should send request - onSuccess string', (done) => {
   // this test is depending on github api
@@ -390,7 +390,7 @@ it('should send request - onSuccess string', (done) => {
   const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
 })
-
+*/
 it('should transform actions - cascade debounce', (done) => {
   const options = { validate: true }
   const config = [
