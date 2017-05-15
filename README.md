@@ -4,7 +4,7 @@
 [![NPM Status](https://img.shields.io/npm/l/redux-orchestrate.svg?style=flat-square)](https://github.com/domagojk/redux-orchestrate/blob/master/LICENSE)
 
 # Redux Orchestrate
-The main idea behind this middleware is to implement a "process manager pattern" ([1](https://survivejs.com/blog/redux-saga-interview/), [2](https://survivejs.com/blog/redux-saga-interview/#sagas)) and support the most common operations with a simple config object.
+The main idea behind this middleware is to implement a "process manager pattern" ([1](https://msdn.microsoft.com/en-us/library/jj591569.aspx), [2](https://survivejs.com/blog/redux-saga-interview/#sagas)) and support the most common operations with a simple config object.
 
 This includes:
 - intercepting and transforming actions
