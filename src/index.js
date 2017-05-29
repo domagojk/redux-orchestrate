@@ -23,7 +23,7 @@ const orchestrate = (config, options) => store => next => originalAction => {
     config.forEach(rule => {
       if (
         rule._cancelFn &&
-        rule._cancelWhen && 
+        rule._cancelWhen &&
         rule._cancelWhen.indexOf(action.type) !== -1
       ) {
         rule._cancelFn(CancelMessage)
@@ -51,13 +51,13 @@ const orchestrate = (config, options) => store => next => originalAction => {
           ruleConfig[ruleKey] = rule[ruleKey]
         }
       })
-      
+
       let dispatchAction = ruleConfig.dispatch
-  
+
       if (typeof ruleConfig.dispatch === 'string') {
         dispatchAction = {...action, type: ruleConfig.dispatch}
       }
-  
+
       let requestConfig = ruleConfig.request
 
       const supportMethods = {
@@ -74,7 +74,6 @@ const orchestrate = (config, options) => store => next => originalAction => {
           requestConfig = {...ruleConfig[method], method: supportMethods[method]}
         }
       })
-
 
       timeTransform(action, ruleConfig, () => {
         if (dispatchAction) {
@@ -124,11 +123,9 @@ const orchestrate = (config, options) => store => next => originalAction => {
             })
         }
       })
-        
     })
   }
   checkAction(originalAction)
 }
-
 
 export default orchestrate
