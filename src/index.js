@@ -88,39 +88,39 @@ const orchestrate = (config, options) => store => next => originalAction => {
               rule._cancelWhen = requestConfig.cancelWhen
             })
           })
-            .then(res => {
-              if (requestConfig.onSuccess) {
-                let onSuccessAction = requestConfig.onSuccess
-                if (typeof requestConfig.onSuccess === 'string') {
-                  onSuccessAction = {type: requestConfig.onSuccess}
-                } else if (typeof requestConfig.onSuccess === 'function') {
-                  onSuccessAction = requestConfig.onSuccess(res)
-                }
-                internalNext(onSuccessAction)
+          .then(res => {
+            if (requestConfig.onSuccess) {
+              let onSuccessAction = requestConfig.onSuccess
+              if (typeof requestConfig.onSuccess === 'string') {
+                onSuccessAction = {type: requestConfig.onSuccess}
+              } else if (typeof requestConfig.onSuccess === 'function') {
+                onSuccessAction = requestConfig.onSuccess(res)
               }
+              internalNext(onSuccessAction)
+            }
 
-              if (requestConfig.callback) {
-                requestConfig.callback(null, res)
+            if (requestConfig.callback) {
+              requestConfig.callback(null, res)
+            }
+          })
+          .catch(err => {
+            if (
+              requestConfig.onFail &&
+              !(err && err.message && err.message === CancelMessage)
+            ) {
+              let onFailAction = requestConfig.onFail
+              if (typeof requestConfig.onFail === 'string') {
+                onFailAction = {type: requestConfig.onFail}
+              } else if (typeof requestConfig.onFail === 'function') {
+                onFailAction = requestConfig.onFail(err)
               }
-            })
-            .catch(err => {
-              if (
-                requestConfig.onFail &&
-                !(err && err.message && err.message === CancelMessage)
-              ) {
-                let onFailAction = requestConfig.onFail
-                if (typeof requestConfig.onFail === 'string') {
-                  onFailAction = {type: requestConfig.onFail}
-                } else if (typeof requestConfig.onFail === 'function') {
-                  onFailAction = requestConfig.onFail(err)
-                }
-                internalNext(onFailAction)
-              }
+              internalNext(onFailAction)
+            }
 
-              if (requestConfig.callback) {
-                requestConfig.callback(err)
-              }
-            })
+            if (requestConfig.callback) {
+              requestConfig.callback(err)
+            }
+          })
         }
       })
     })
