@@ -360,7 +360,7 @@ it('should send request', (done) => {
   store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
 })
 */
-
+/*
 it('should send request - onSuccess string', (done) => {
   // this test is depending on github api
   const actions = []
@@ -390,7 +390,7 @@ it('should send request - onSuccess string', (done) => {
   const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   store.dispatch({ type: 'ADD_MESSAGE_REQUESTED' })
 })
-
+*/
 it('should transform actions - cascade debounce', (done) => {
   const options = { validate: true }
   const config = [
@@ -484,7 +484,7 @@ it('should cancel sending request', (done) => {
     {
       case: 'ADD_MESSAGE_REQUESTED',
       request: {
-        url: 'https://api.github.com/users/test',
+        url: 'https://jsonplaceholder.typicode.com/posts/1',
         onFail: 'ON_FAIL',
         onSuccess: 'ON_SUCCESS',
         cancelWhen: [
