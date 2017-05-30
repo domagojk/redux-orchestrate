@@ -33,13 +33,7 @@ const orchestrate = (config, options) => store => next => originalAction => {
         rule._debounceTimeoutRefs = {}
       }
 
-      let caseMatched = false
-      forceArray(rule.case).forEach(c => {
-        if (action.type === c) {
-          caseMatched = true
-        }
-      })
-      if (!caseMatched) {
+      if (forceArray(rule.case).indexOf(action.type) === -1) {
         return
       }
 
