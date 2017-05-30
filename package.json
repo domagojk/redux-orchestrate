@@ -1,6 +1,6 @@
 {
   "name": "redux-orchestrate",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Redux middleware for coordinating actions and handling side effects.",
   "main": "lib/index.js",
   "scripts": {
