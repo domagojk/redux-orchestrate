@@ -3,7 +3,6 @@ import forceArray from './forceArray'
 import timeTransform from './timeTransform'
 
 const CancelToken = axios.CancelToken
-const CancelMessage = { type: 'CANCEL_EVENT' }
 
 const orchestrate = (config, options) => store => next => originalAction => {
   if (!Array.isArray(config)) {
@@ -21,26 +20,8 @@ const orchestrate = (config, options) => store => next => originalAction => {
 
   function checkAction (action) {
     config.forEach(rule => {
-      if (
-        rule._cancelFn &&
-        rule._cancelWhen &&
-        rule._cancelWhen.indexOf(action.type) !== -1
-      ) {
-        rule._cancelFn(CancelMessage)
-      }
-
       if (typeof rule._debounceTimeoutRefs !== 'object') {
         rule._debounceTimeoutRefs = {}
-      }
-
-      let caseMatched = false
-      forceArray(rule.case).forEach(c => {
-        if (action.type === c) {
-          caseMatched = true
-        }
-      })
-      if (!caseMatched) {
-        return
       }
 
       const ruleConfig = {}
@@ -51,90 +32,102 @@ const orchestrate = (config, options) => store => next => originalAction => {
           ruleConfig[ruleKey] = rule[ruleKey]
         }
       })
-
-      let dispatchActions
-      if (ruleConfig.dispatch) {
-        dispatchActions = ruleConfig.dispatch
-        if (!Array.isArray(dispatchActions)) {
-          dispatchActions = [dispatchActions]
+      const testCase = forceArray(ruleConfig.case)
+      testCase.forEach( c => {
+        let dispatchActions
+        if (ruleConfig.dispatch) {
+          dispatchActions = ruleConfig.dispatch
+          if (!Array.isArray(dispatchActions)) {
+            dispatchActions = [dispatchActions]
+          }
+          dispatchActions = dispatchActions.map(dispatchAction => {
+            if (typeof dispatchAction === 'string') {
+              return {...action, type: dispatchAction}
+            } else {
+              return dispatchAction
+            }
+          })
         }
-        dispatchActions = dispatchActions.map(dispatchAction => {
-          if (typeof dispatchAction === 'string') {
-            return {...action, type: dispatchAction}
-          } else {
-            return dispatchAction
+    
+        let requestConfig = ruleConfig.request
+
+        const supportMethods = {
+          get: 'get',
+          post: 'post',
+          put: 'put',
+          patch: 'patch',
+          del: 'delete',
+          head: 'head',
+          options: 'options'
+        }
+        Object.keys(supportMethods).forEach(method => {
+          if (ruleConfig[method]) {
+            requestConfig = {...ruleConfig[method], method: supportMethods[method]}
           }
         })
-      }
-
-      let requestConfig = ruleConfig.request
-
-      const supportMethods = {
-        get: 'get',
-        post: 'post',
-        put: 'put',
-        patch: 'patch',
-        del: 'delete',
-        head: 'head',
-        options: 'options'
-      }
-      Object.keys(supportMethods).forEach(method => {
-        if (ruleConfig[method]) {
-          requestConfig = {...ruleConfig[method], method: supportMethods[method]}
-        }
-      })
-
-      timeTransform(action, ruleConfig, () => {
-        if (dispatchActions) {
-          dispatchActions.map(internalNext)
+        
+        if (
+          rule._cancelFn &&
+          requestConfig && 
+          requestConfig.cancelWhen && 
+          requestConfig.cancelWhen.indexOf(action.type) !== -1
+        ) {
+          rule._cancelFn()
         }
 
-        if (requestConfig) {
-          axios({
-            ...requestConfig,
-            cancelToken: new CancelToken(c => {
-              rule._cancelFn = c
-              rule._cancelWhen = requestConfig.cancelWhen
-            })
-          })
-          .then(res => {
-            if (requestConfig.onSuccess) {
-              let onSuccessAction = requestConfig.onSuccess
-              if (typeof requestConfig.onSuccess === 'string') {
-                onSuccessAction = {type: requestConfig.onSuccess}
-              } else if (typeof requestConfig.onSuccess === 'function') {
-                onSuccessAction = requestConfig.onSuccess(res)
-              }
-              internalNext(onSuccessAction)
+        if (action.type === c) {
+          timeTransform(action, ruleConfig, () => {
+            if (dispatchActions) {
+              dispatchActions.map(internalNext)
             }
 
-            if (requestConfig.callback) {
-              requestConfig.callback(null, res)
-            }
-          })
-          .catch(err => {
-            if (
-              requestConfig.onFail &&
-              !(err && err.message && err.message === CancelMessage)
-            ) {
-              let onFailAction = requestConfig.onFail
-              if (typeof requestConfig.onFail === 'string') {
-                onFailAction = {type: requestConfig.onFail}
-              } else if (typeof requestConfig.onFail === 'function') {
-                onFailAction = requestConfig.onFail(err)
-              }
-              internalNext(onFailAction)
-            }
+            if (requestConfig) {
+              axios({
+                ...requestConfig,
+                cancelToken: new CancelToken(c => rule._cancelFn = c)
+              })
+                .then(res => {
+                  if (requestConfig.onSuccess) {
+                    let onSuccessAction = requestConfig.onSuccess
+                    if (typeof requestConfig.onSuccess === 'string') {
+                      onSuccessAction = {type: requestConfig.onSuccess}
+                    } else if (typeof requestConfig.onSuccess === 'function') {
+                      onSuccessAction = requestConfig.onSuccess(res)
+                    }
+                    internalNext(onSuccessAction)
+                  }
 
-            if (requestConfig.callback) {
-              requestConfig.callback(err)
+                  if (requestConfig.callback) {
+                    requestConfig.callback(null, res)
+                  }
+                })
+                .catch(err => {
+                  if (
+                    requestConfig.onFail &&
+                    !(err && err.message && err.message.type === 'CANCEL_EVENT')
+                  ) {
+                    let onFailAction = requestConfig.onFail
+                    if (typeof requestConfig.onFail === 'string') {
+                      onFailAction = {type: requestConfig.onFail}
+                    } else if (typeof requestConfig.onFail === 'function') {
+                      onFailAction = requestConfig.onFail(err)
+                    }
+                    internalNext(onFailAction)
+                  }
+
+                  if (requestConfig.callback) {
+                    requestConfig.callback(err)
+                  }
+                })
             }
           })
+          
         }
       })
     })
   }
   checkAction(originalAction)
 }
+
 
 export default orchestrate
