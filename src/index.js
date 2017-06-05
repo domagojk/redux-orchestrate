@@ -34,10 +34,19 @@ const orchestrate = (config, options) => store => next => originalAction => {
       })
       const testCase = forceArray(ruleConfig.case)
       testCase.forEach( c => {
-        let dispatchAction = ruleConfig.dispatch
-    
-        if (typeof ruleConfig.dispatch === 'string') {
-          dispatchAction = {...action, type: ruleConfig.dispatch}
+        let dispatchActions
+        if (ruleConfig.dispatch) {
+          dispatchActions = ruleConfig.dispatch
+          if (!Array.isArray(dispatchActions)) {
+            dispatchActions = [dispatchActions]
+          }
+          dispatchActions = dispatchActions.map(dispatchAction => {
+            if (typeof dispatchAction === 'string') {
+              return {...action, type: dispatchAction}
+            } else {
+              return dispatchAction
+            }
+          })
         }
     
         let requestConfig = ruleConfig.request
@@ -68,8 +77,8 @@ const orchestrate = (config, options) => store => next => originalAction => {
 
         if (action.type === c) {
           timeTransform(action, ruleConfig, () => {
-            if (dispatchAction) {
-              internalNext(dispatchAction)
+            if (dispatchActions) {
+              dispatchActions.map(internalNext)
             }
 
             if (requestConfig) {
