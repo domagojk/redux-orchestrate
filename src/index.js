@@ -92,7 +92,7 @@ const orchestrate = (config, options) => store => next => originalAction => {
                     if (typeof requestConfig.onSuccess === 'string') {
                       onSuccessAction = {type: requestConfig.onSuccess}
                     } else if (typeof requestConfig.onSuccess === 'function') {
-                      onSuccessAction = requestConfig.onSuccess(res)
+                      onSuccessAction = requestConfig.onSuccess(res, action)
                     }
                     internalNext(onSuccessAction)
                   }
@@ -110,7 +110,7 @@ const orchestrate = (config, options) => store => next => originalAction => {
                     if (typeof requestConfig.onFail === 'string') {
                       onFailAction = {type: requestConfig.onFail}
                     } else if (typeof requestConfig.onFail === 'function') {
-                      onFailAction = requestConfig.onFail(err)
+                      onFailAction = requestConfig.onFail(err, action)
                     }
                     internalNext(onFailAction)
                   }
