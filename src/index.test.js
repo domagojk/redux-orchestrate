@@ -513,3 +513,29 @@ it('should cancel sending request', (done) => {
     store.dispatch({ type: 'CANCEL_EVENT' })
   }, 0)
 })
+
+it('should dispatch multiple actions', (done) => {
+  const options = { validate: true }
+  const config = [
+    {
+      case: 'TEST',
+      dispatch: ['FIRST', 'SECOND']
+    }
+  ]
+
+  const actions = []
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
+  store.dispatch({ type: 'TEST' })
+
+  setTimeout(() => {
+    if (actions.length === 3) {
+      done()
+    } else {
+      done.fail()
+    }
+  }, 100)
+})

@@ -14,9 +14,14 @@ const orchestrate = (config, options) => store => next => originalAction => {
     next(originalAction)
   }
 
-  function internalNext (action) {
-    next(action)
-    checkAction(action)
+  function internalNext (action, refAction) {
+    forceArray(action).forEach(a => {
+      if (typeof a === 'string') {
+        a = {...refAction, type: a}
+      }
+      next(a)
+      checkAction(a)
+    })
   }
 
   function checkAction (action) {
@@ -47,11 +52,6 @@ const orchestrate = (config, options) => store => next => originalAction => {
       })
 
       let dispatchAction = ruleConfig.dispatch
-
-      if (typeof ruleConfig.dispatch === 'string') {
-        dispatchAction = {...action, type: ruleConfig.dispatch}
-      }
-
       let requestConfig = ruleConfig.request
 
       const supportMethods = {
@@ -71,7 +71,7 @@ const orchestrate = (config, options) => store => next => originalAction => {
 
       timeTransform(action, ruleConfig, () => {
         if (dispatchAction) {
-          internalNext(dispatchAction)
+          internalNext(dispatchAction, action)
         }
 
         if (requestConfig) {
@@ -90,7 +90,7 @@ const orchestrate = (config, options) => store => next => originalAction => {
               } else if (typeof requestConfig.onSuccess === 'function') {
                 onSuccessAction = requestConfig.onSuccess(res)
               }
-              internalNext(onSuccessAction)
+              internalNext(onSuccessAction, {})
             }
 
             if (requestConfig.callback) {
@@ -108,7 +108,7 @@ const orchestrate = (config, options) => store => next => originalAction => {
               } else if (typeof requestConfig.onFail === 'function') {
                 onFailAction = requestConfig.onFail(err)
               }
-              internalNext(onFailAction)
+              internalNext(onFailAction, {})
             }
 
             if (requestConfig.callback) {
