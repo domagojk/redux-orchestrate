@@ -27,7 +27,7 @@ const store = createStore(reducer, applyMiddleware(orchestrate(processManager)))
 ```
 
 ### Tranform
-"In case  of action(s) `X` -> dispatch action(s) `Y`"
+In case  of action(s) `X` -> dispatch action(s) `Y`
 
 ```javascript
 const processManager = [
@@ -42,9 +42,9 @@ const processManager = [
 ```
 
 ### Cascade
-"In case of action(s) `X` -> dispatch action(s) `Y`"
+In case of action(s) `X` -> dispatch action(s) `Y`
 
-"In case of action(s) `Y` -> dispatch action(s) `Z`"
+In case of action(s) `Y` -> dispatch action(s) `Z`
 
 ```javascript
 const processManager = [
@@ -63,7 +63,7 @@ const processManager = [
 ```
 
 ### Delay
-"In case of action(s) `X` -> wait for `k` miliseconds -> dispatch action(s) `Y`"
+In case of action(s) `X` -> wait for `k` miliseconds -> dispatch action(s) `Y`
 
 ```javascript
 const processManager = [
@@ -79,7 +79,7 @@ const processManager = [
 ```
 
 ### Debounce
-"In case of action(s) `X` -> debounce for `k` miliseconds -> dispatch action(s) `Y`"
+In case of action(s) `X` -> debounce for `k` miliseconds -> dispatch action(s) `Y`
 
 ```javascript
 const processManager = [
@@ -95,7 +95,7 @@ const processManager = [
 ```
 
 ### Dispatch Logic
-"In case of action(s) `X` -> perform logic using orignal `action` and `state` -> dispatch action(s) `Y`"
+In case of action(s) `X` -> perform logic using orignal `action` and `state` -> dispatch action(s) `Y`
 
 ```javascript
 const processManager = [
@@ -114,11 +114,11 @@ const processManager = [
 ```
 
 ### Ajax Request
-"In case of action(s) `X` -> make an ajax request -> 
+In case of action(s) `X` -> make an ajax request -> 
 
-  -> in case of `success` -> dispatch `Z`
+  -> in case of `success` -> dispatch `Y`
 
-  -> in case of `failure` -> dispatch `Z`"
+  -> in case of `failure` -> dispatch `Z`
 
 ```javascript
 const processManager = [
@@ -174,7 +174,7 @@ const processManager = [
 ```
 
 ### Request Cancelation
-"In case of action(s) `X` -> make an ajax request -> 
+In case of action(s) `X` -> make an ajax request -> 
 
 in case of action(s) `Y` -> cancel ajax request
 
