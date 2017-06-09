@@ -57,7 +57,10 @@ const processManager = [
   },
   {
     case: ADD_MESSAGE,
-    dispatch: ANOTHER_ACTION
+    dispatch: [
+      ANOTHER_ACTION,
+      ONE_MORE
+    ]
   }
 ]
 ```
