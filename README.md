@@ -4,16 +4,9 @@
 [![NPM Status](https://img.shields.io/npm/l/redux-orchestrate.svg?style=flat-square)](https://github.com/domagojk/redux-orchestrate/blob/master/LICENSE)
 
 # Redux Orchestrate
-The main idea behind this middleware is to implement a "process manager pattern" ([1](https://msdn.microsoft.com/en-us/library/jj591569.aspx), [2](https://survivejs.com/blog/redux-saga-interview/#sagas)) and support the most common operations with a simple config object.
+Simple alternative to [redux-saga](https://github.com/redux-saga/redux-saga) or [redux-observable](https://github.com/redux-observable/redux-observable).
 
-This includes:
-- intercepting and transforming actions
-- making a network request
-- cancelling pending network requests
-- debouncing
-- delaying
-
-redux-orchestrate uses similar (DDD/ES/CQRS inspired) solution as in [redux-saga](https://github.com/redux-saga/redux-saga) and [redux-observable](https://github.com/redux-observable/redux-observable), but rather than using generators or Observables, everything is defined with an array of objects.
+Rather than using generators or Observables, most common operations are defined with a simple config object.
 
 ## Installation
 ```bash
@@ -33,7 +26,8 @@ const processManager = [
 const store = createStore(reducer, applyMiddleware(orchestrate(processManager)))
 ```
 
-### Tranforming actions
+### Tranform
+"In case  of action(s) `X` -> dispatch action(s) `Y`"
 
 ```javascript
 const processManager = [
@@ -47,25 +41,10 @@ const processManager = [
 ]
 ```
 
-Why would you do this?
+### Cascade
+"In case of action(s) `X` -> dispatch action(s) `Y`"
 
-Well, suppose you are building a facebook-like chat app.
-Every time the `ADD_MESSAGE` action is dispatched, redux reducer is pushing new messages to an array.
-
-But, this approach forces component to be aware of its environment.
-So, even though someone "had clicked on a send button", this fact is never dispatched and a decision on what should happen next is made at "the component level".
-
-If however, there is a layer where you can **transform** `SEND_MESSAGE_BUTTON_CLICKED` to `ADD_MESSAGE`,
-you would end up decoupling reducers from components, making both more isolated and reusable.
-
-### Handling side-effects
-What if, later on, you wish to do some analytics on your app?
-
-For example, how often is *send button* used compared to pressing the enter key?
-
-This is another benefit of dispatching **facts** rather then **intents**. You don't have to make a lot changes to your codebase, because you had already distinguish the enter key from a button click. 
-
-All you need to do is define server endpoint which will collect these events:
+"In case of action(s) `y` -> dispatch action(s) `z`"
 
 ```javascript
 const processManager = [
@@ -77,48 +56,144 @@ const processManager = [
     dispatch: ADD_MESSAGE
   },
   {
-   case: [
-      // list of all events we wish to track
-      SEND_MESSAGE_BUTTON_CLICKED,
-      MESSAGE_INPUT_ENTER_KEY_PRESSED,
-      MESSAGE_DELETE_BUTTON_CLICKED
-    ],
-    post: action => ({
-      url: 'https://analytics.server.com',
-      data: {
-        event: action.type
-      }
-    })
+    case: ADD_MESSAGE,
+    dispatch: ANOTHER_ACTION
   }
 ]
 ```
 
-But what if a network response is an integral part of your app?
+### Delay
+"In case of action(s) `X` -> wait for `k` miliseconds -> dispatch action(s) `Y`"
 
-For example, chat apps often have a feature of flagging messages based on its status (`sending`, `sent`, `error_sending`),
-and to confirm whether a message has been sent, you need to know if a network request succeeded or failed.
+```javascript
+const processManager = [
+  {
+    case: [
+      SEND_MESSAGE_BUTTON_CLICKED,
+      MESSAGE_INPUT_ENTER_KEY_PRESSED
+    ],
+    delay: 500
+    dispatch: ADD_MESSAGE
+  }
+]
+```
 
-For this kind of async operations you can use [observables](https://github.com/redux-observable/redux-observable), [generator functions](https://github.com/redux-saga/redux-saga) or [plain callbacks](https://github.com/gaearon/redux-thunk). 
+### Debounce
+"In case of action(s) `X` -> debounce for `k` miliseconds -> dispatch action(s) `Y`"
 
-But since using a network response for dispatching another action is so common, why not abstracting it?
+```javascript
+const processManager = [
+  {
+    case: [
+      SEND_MESSAGE_BUTTON_CLICKED,
+      MESSAGE_INPUT_ENTER_KEY_PRESSED
+    ],
+    debounce: 500
+    dispatch: ADD_MESSAGE
+  }
+]
+```
+
+### Dispatch Logic
+"In case of action(s) `X` -> perform logic using orignal `action` and `state` -> dispatch action(s) `Y`"
+
+```javascript
+const processManager = [
+  {
+    case: [
+      SEND_MESSAGE_BUTTON_CLICKED,
+      MESSAGE_INPUT_ENTER_KEY_PRESSED
+    ],
+    dispatch: (action, state) => {
+      if (state.canAddMessage) {
+        return { ...action, type: ADD_MESSAGE }
+      }
+    }
+  }
+]
+```
+
+### Ajax Request
+"In case of action(s) `X` -> make an ajax request -> 
+
+  -> in case of `success` -> dispatch `y`
+
+  -> in case of `failure` -> dispatch `z`"
 
 ```javascript
 const processManager = [
   {
     case: ADD_MESSAGE,
-    post: a => ({
-      url: 'https://chat.app.com/new',
+    get: {
+      url: 'https://server.com',
+      onSuccess: MESSAGE_SENT,
+      onFail: MESSAGE_SENDING_ERROR,
+    }
+  }
+]
+```
+
+```javascript
+const processManager = [
+  {
+    case: ADD_MESSAGE,
+    post: action => ({
+      url: 'https://server.com/new',
       data: {
-        content: a.payload
+        content: action.payload
       },
       onSuccess: { type: MESSAGE_SENT, id: a.id },
-      onFail: { type: MESSAGE_SENDING_ERROR, id: a.id },
+      onFail: { type: MESSAGE_SENDING_ERROR, id: a.id }
     })
   }
 ]
 ```
 
-### Debouncing and canceling
+```javascript
+const processManager = [
+  {
+    case: ADD_MESSAGE,
+    post: action => ({
+      url: 'https://server.com/new',
+      data: {
+        content: action.payload
+      },
+      onSuccess: res => ({ 
+        type: MESSAGE_SENT,
+        dataFromRes: res.data
+        id: a.id 
+      }),
+      onFail: err => ({
+        type: MESSAGE_SENDING_ERROR,
+        errorMessage: err.message
+        id: a.id 
+      })
+    })
+  }
+]
+```
+
+### Request Cancelation
+"In case of action(s) `X` -> make an ajax request -> 
+
+in case of action(s) `y` -> cancel ajax request
+
+```javascript
+const processManager = [
+  {
+    case: ADD_MESSAGE,
+    post: {
+      url: `http://server.com`,
+      cancelWhen: [
+        STOP_SENDING
+      ],
+      onSuccess: MESSAGE_SENT
+    }
+  }
+]
+```
+
+### Autocomplete example
 Now let's say we need to implement an autocomplete feature.
 In short, these are feature requirements:
 - Any time the user changes an input field, make a network request
@@ -144,26 +219,8 @@ const processManager = [
   }
 ]
 ```
-### More complex logic
-If you need to perform some kind of logic before dispatching another action, you can use the fact that `dispatch` and `request` (or aliases like `post`, `get`, etc.) can be defined as a function:
 
-```javascript
-const processManager = [
-  {
-    case: [
-      SEND_MESSAGE_BUTTON_CLICKED,
-      MESSAGE_INPUT_ENTER_KEY_PRESSED
-    ],
-    dispatch: (action, state) => {
-      if (state.canAddMessage) {
-        return { ...action, type: ADD_MESSAGE }
-      }
-    }
-  }
-]
-```
-
-You can also "cascade definitions" to perform even more complex logic:
+### Cascade - more complex example 
 
 ```javascript
 const processManager = [
@@ -217,8 +274,6 @@ All options passed in `request` (or aliases like `post`, `get`, etc.) is mapped 
 Config object which defines the middleware logic is here reffered as "process manager".
 
 This term is borrowed from [CQRS/ES terminology](https://msdn.microsoft.com/en-us/library/jj591569.aspx) where the same concept is also referred as "saga" - "a piece of code that coordinates and routes messages between *bounded contexts* and *aggregates*".
-
-Also, the idea of using **facts** rather then **intents** suggested in examples, originates [from event sourced systems](https://www.youtube.com/watch?v=8JKjvY4etTY).
 
 ### Why "orchestrate"?
 Term "orchestrate" is used to reffer to a single, central point for coordinating multiple entities and making them less coupled.
