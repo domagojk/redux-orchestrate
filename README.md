@@ -44,7 +44,7 @@ const processManager = [
 ### Cascade
 "In case of action(s) `X` -> dispatch action(s) `Y`"
 
-"In case of action(s) `y` -> dispatch action(s) `z`"
+"In case of action(s) `Y` -> dispatch action(s) `Z`"
 
 ```javascript
 const processManager = [
@@ -116,9 +116,9 @@ const processManager = [
 ### Ajax Request
 "In case of action(s) `X` -> make an ajax request -> 
 
-  -> in case of `success` -> dispatch `y`
+  -> in case of `success` -> dispatch `Z`
 
-  -> in case of `failure` -> dispatch `z`"
+  -> in case of `failure` -> dispatch `Z`"
 
 ```javascript
 const processManager = [
@@ -176,7 +176,7 @@ const processManager = [
 ### Request Cancelation
 "In case of action(s) `X` -> make an ajax request -> 
 
-in case of action(s) `y` -> cancel ajax request
+in case of action(s) `Y` -> cancel ajax request
 
 ```javascript
 const processManager = [
