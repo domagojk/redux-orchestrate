@@ -136,6 +136,8 @@ const processManager = [
 ]
 ```
 
+`post` request using `action.payload`:
+
 ```javascript
 const processManager = [
   {
@@ -151,6 +153,8 @@ const processManager = [
   }
 ]
 ```
+
+making use od `res` and `err` response object from `onSuccess` and `onFail`:
 
 ```javascript
 const processManager = [
