@@ -540,6 +540,22 @@ it('should dispatch multiple actions', (done) => {
   }, 100)
 })
 
+it('should add rules dynamically', () => {
+  const rules = [{
+    case: 'TEST',
+    dispatch: ['FIRST', 'SECOND']
+  }]
+
+  const reducer = (state, action) => {
+    return state
+  }
+
+  const store = createStore(reducer, applyMiddleware(orchestrate([])))
+  orchestrate.addRules(rules);
+
+  expect(orchestrate.config.length).toEqual(1)
+})
+
 it('should dispatch added actions from dynamically added rules', (done) => {
   const options = { validate: true }
   const rules = [{
