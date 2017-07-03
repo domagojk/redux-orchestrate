@@ -125,8 +125,8 @@ const orchestrate = (config, options) => {
   }
 }
 
-orchestrate.addRule = rule => {
-  orchestrate.config.push(rule)
+orchestrate.addRules = rules => {
+  orchestrate.config.push(...rules)
 }
 
 export default orchestrate
