@@ -8,7 +8,7 @@ function getActions(config, options, dispatcher) {
     return state
   }
   const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
-  
+
   dispatcher(store.dispatch)
 
   return actions
@@ -134,7 +134,7 @@ it('should transform actions - multiple rules', () => {
 
   expect(getLastAction(config, options, { type: 'TEST' }))
     .toEqual({ type: 'AFTER_ORCHESTRATION' })
-  
+
   expect(getLastAction(config, options, { type: 'TEST2' }))
     .toEqual({ type: 'AFTER_ORCHESTRATION2' })
 })
@@ -156,7 +156,7 @@ it('should transform actions - delay', (done) => {
   }
   const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
   store.dispatch({ type: 'TEST' })
-    
+
   if (actions.length !== 1) {
     done.fail(`expected 1 dispatched action, got ${actions.length}`)
   }
@@ -191,7 +191,7 @@ it('should transform actions - debounce', (done) => {
     return state
   }
   const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
-  
+
   store.dispatch({ type: 'TEST' })
   store.dispatch({ type: 'TEST' })
   store.dispatch({ type: 'TEST' })
@@ -226,7 +226,7 @@ it('should transform actions - delay debounce', (done) => {
     return state
   }
   const store = createStore(reducer, applyMiddleware(orchestrate(config, options)))
-  
+
   store.dispatch({ type: 'TEST' })
   store.dispatch({ type: 'TEST' })
   store.dispatch({ type: 'TEST' })
@@ -417,7 +417,7 @@ it('should transform actions - cascade debounce', (done) => {
   store.dispatch({ type: 'CHAT_INPUT_SUBMITTED' })
   store.dispatch({ type: 'MESSANGER_INPUT_SUBMITED' })
   store.dispatch({ type: 'CHAT_INPUT_SUBMITTED' })
-  
+
   setTimeout(() => {
     if (
       actions[1].type === 'ADD_MESSAGE_REQUESTED',
@@ -430,7 +430,7 @@ it('should transform actions - cascade debounce', (done) => {
       done.fail()
     }
   }, 200)
-  
+
 })
 
 it('should fail sending request - debounce', (done) => {
@@ -539,3 +539,30 @@ it('should dispatch multiple actions', (done) => {
     }
   }, 100)
 })
+
+it('should dispatch added actions from dynamically added rule', (done) => {
+  const options = { validate: true }
+  const rule = {
+    case: 'TEST',
+    dispatch: ['FIRST', 'SECOND']
+  }
+
+  const actions = []
+  const reducer = (state, action) => {
+    actions.push(action)
+    return state
+  }
+  const store = createStore(reducer, applyMiddleware(orchestrate([], options)))
+
+  orchestrate.addRule(rule);
+  store.dispatch({ type: 'TEST' })
+
+  setTimeout(() => {
+    if (actions.length === 3) {
+      done()
+    } else {
+      done.fail()
+    }
+  }, 100)
+})
+
