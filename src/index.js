@@ -5,13 +5,8 @@ import timeTransform from './timeTransform'
 const CancelToken = axios.CancelToken
 const CancelMessage = { type: 'CANCEL_EVENT' }
 
-const orchestrate = (config, options) => {
-
-  orchestrate.config = config || []
-
-  return store => next => originalAction => {
-    config = orchestrate.config
-
+const orchestrate = (config = [], options) => {
+  const middleware = store => next => originalAction => {
     if (!Array.isArray(config)) {
       throw new Error('Orchestrate config must be an array')
     }
@@ -123,10 +118,12 @@ const orchestrate = (config, options) => {
     }
     checkAction(originalAction)
   }
-}
 
-orchestrate.addRules = rules => {
-  orchestrate.config.push(...rules)
+  middleware.addRules = rules => {
+    config.push(...rules)
+  }
+
+  return middleware
 }
 
 export default orchestrate
