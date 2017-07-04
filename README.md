@@ -14,6 +14,7 @@ npm install --save redux-orchestrate
 ```
 
 ## Usage
+
 ```javascript
 import { createStore, applyMiddleware } from 'redux'
 import orchestrate from 'redux-orchestrate'
@@ -23,8 +24,21 @@ const processManager = [
   // process manager logic
 ]
 
+// pass rules directly to middleware
 const store = createStore(reducer, applyMiddleware(orchestrate(processManager)))
 ```
+
+It's also possible to add rules dynamically after middleware has been applied:
+
+```javascript
+const processManager = [
+  // process manager logic
+]
+
+orchestrate.addRules(processManager);
+```
+
+
 
 ### Tranform
 In case  of action(s) `X` -> dispatch action(s) `Y`
@@ -117,7 +131,7 @@ const processManager = [
 ```
 
 ### Ajax Request
-In case of action(s) `X` -> make an ajax request -> 
+In case of action(s) `X` -> make an ajax request ->
 
   -> in case of `success` -> dispatch `Y`
 
@@ -165,15 +179,15 @@ const processManager = [
       data: {
         content: action.payload
       },
-      onSuccess: res => ({ 
+      onSuccess: res => ({
         type: MESSAGE_SENT,
         dataFromRes: res.data
-        id: a.id 
+        id: a.id
       }),
       onFail: err => ({
         type: MESSAGE_SENDING_ERROR,
         errorMessage: err.message
-        id: a.id 
+        id: a.id
       })
     })
   }
@@ -181,7 +195,7 @@ const processManager = [
 ```
 
 ### Request Cancelation
-In case of action(s) `X` -> make an ajax request -> 
+In case of action(s) `X` -> make an ajax request ->
 
 in case of action(s) `Y` -> cancel ajax request
 
@@ -220,14 +234,14 @@ const processManager = [
       ],
       onSuccess: res => ({
         type: AUTOCOMPLETE_SUGGESTION,      // if query was successful, dispatch an event
-        payload: res.data 
+        payload: res.data
       })
     })
   }
 ]
 ```
 
-### Cascade - more complex example 
+### Cascade - more complex example
 
 ```javascript
 const processManager = [
@@ -264,7 +278,7 @@ const processManager = [
 ## FAQ
 
 ### Ok, but what about other kind of async operations?
-This middleware is not an attempt to solve all your problems. If you need to handle more complex async operations which are better solved by some other tools (generators, observables), then you should use middlewares that supports them or define your own ([it's not that hard](http://redux.js.org/docs/advanced/Middleware.html)). 
+This middleware is not an attempt to solve all your problems. If you need to handle more complex async operations which are better solved by some other tools (generators, observables), then you should use middlewares that supports them or define your own ([it's not that hard](http://redux.js.org/docs/advanced/Middleware.html)).
 
 Also, don't forget that you can combine multiple middlewares.
 
