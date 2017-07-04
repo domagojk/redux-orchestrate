@@ -28,20 +28,8 @@ const processManager = [
 const store = createStore(reducer, applyMiddleware(orchestrate(processManager)))
 ```
 
-It's also possible to add rules dynamically after middleware has been applied:
-
-```javascript
-const processManager = [
-  // process manager logic
-]
-
-orchestrate.addRules(processManager);
-```
-
-
-
 ### Tranform
-In case  of action(s) `X` -> dispatch action(s) `Y`
+In case of action(s) `X` -> dispatch action(s) `Y`
 
 ```javascript
 const processManager = [
@@ -273,6 +261,21 @@ const processManager = [
     })
   }
 ]
+```
+
+### Dynamically added rules
+Sometimes you may wish to add rules dynamically after middleware has been applied:
+
+```javascript
+const processManager = [
+  // initial rules
+]
+const orchestrateMiddleware = orchestrate(processManager)
+
+const store = createStore(reducer, applyMiddleware(orchestrateMiddleware))
+orchestrateMiddleware.addRules([
+  // additional rules added dynamically
+])
 ```
 
 ## FAQ
