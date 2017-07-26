@@ -149,8 +149,8 @@ const processManager = [
       data: {
         content: action.payload
       },
-      onSuccess: { type: MESSAGE_SENT, id: a.id },
-      onFail: { type: MESSAGE_SENDING_ERROR, id: a.id }
+      onSuccess: { type: MESSAGE_SENT, id: action.id },
+      onFail: { type: MESSAGE_SENDING_ERROR, id: action.id }
     })
   }
 ]
@@ -170,12 +170,12 @@ const processManager = [
       onSuccess: res => ({
         type: MESSAGE_SENT,
         dataFromRes: res.data
-        id: a.id
+        id: action.id
       }),
       onFail: err => ({
         type: MESSAGE_SENDING_ERROR,
         errorMessage: err.message
-        id: a.id
+        id: action.id
       })
     })
   }
