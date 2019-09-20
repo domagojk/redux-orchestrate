@@ -39,10 +39,6 @@ const orchestrate = (config = [], options) => {
           rule._debounceTimeoutRefs = {}
         }
 
-        if (forceArray(rule.case).indexOf(action.type) === -1) {
-          return
-        }
-
         const ruleConfig = {}
         Object.keys(rule).forEach(ruleKey => {
           if (typeof rule[ruleKey] === 'function') {
@@ -51,6 +47,10 @@ const orchestrate = (config = [], options) => {
             ruleConfig[ruleKey] = rule[ruleKey]
           }
         })
+
+        if (forceArray(ruleConfig.case).indexOf(action.type) === -1) {
+          return
+        }
 
         let dispatchAction = ruleConfig.dispatch
         let requestConfig = ruleConfig.request
